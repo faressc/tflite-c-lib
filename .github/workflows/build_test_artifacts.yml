@@ -16,14 +16,13 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BUILD_DIR: tflite_build
   LIBRARY_NAME: tensorflowlite_c
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   # Use up to 4 cpus to build juceaide, etc
   CMAKE_BUILD_PARALLEL_LEVEL: 4 
   # Name of the build directory
-  BUILD_DIR: build
+  BUILD_DIR: tflite_build
 
 jobs:
 
@@ -89,14 +88,14 @@ jobs:
       - name: cmake configure
         shell: bash
         run: |
-          mkdir tflite_build
-          cd tflite_build
+          mkdir ${{ env.BUILD_DIR }}}
+          cd ${{ env.BUILD_DIR }}
           cmake ../tensorflow_src/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }}
 
       # Build the project
       - name: cmake build
         shell: bash
-        run: cmake --build tflite_build --config ${{ env.BUILD_TYPE }} --parallel ${{ env.CMAKE_BUILD_PARALLEL_LEVEL }}
+        run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel ${{ env.CMAKE_BUILD_PARALLEL_LEVEL }}
       
       # Declaring the product name and the packaging directory
       - name: declare artefact variables
