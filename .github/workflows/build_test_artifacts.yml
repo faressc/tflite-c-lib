@@ -82,6 +82,11 @@ jobs:
         with:
           key: v3-${{ matrix.os }}-${{ env.BUILD_TYPE }}
           variant: ${{ matrix.ccache }}
+
+      - name: install windows deps
+        if: ${{ matrix.name == 'Windows' }}
+        shell: bash
+        run: pacman -S git patch unzip
       
       # Typical cmake configuration with default generator
       - name: cmake configure
