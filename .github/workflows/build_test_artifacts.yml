@@ -16,6 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  BUILD_DIR: tflite_build
+  LIBRARY_NAME: tensorflowlite_c
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   # Use up to 4 cpus to build juceaide, etc
@@ -82,11 +84,6 @@ jobs:
         with:
           key: v3-${{ matrix.os }}-${{ env.BUILD_TYPE }}
           variant: ${{ matrix.ccache }}
-
-      - name: install windows deps
-        if: ${{ matrix.name == 'Windows' }}
-        shell: bash
-        run: pacman -S git patch unzip
       
       # Typical cmake configuration with default generator
       - name: cmake configure
@@ -101,29 +98,27 @@ jobs:
         shell: bash
         run: cmake --build tflite_build --config ${{ env.BUILD_TYPE }} --parallel ${{ env.CMAKE_BUILD_PARALLEL_LEVEL }}
       
-      # # Declaring the product name and the packaging directory
-      # - name: declare artefact variables
-      #   shell: bash
-      #   run: |
-      #     echo "PACKAGE_DIR=artefacts/${{ env.PROJECT_NAME }}-${{ matrix.name}}" >> $GITHUB_ENV
-      #     echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-${{ matrix.name }}" >> $GITHUB_ENV
+      # Declaring the product name and the packaging directory
+      - name: declare artefact variables
+        shell: bash
+        run: |
+          echo "PACKAGE_DIR=artefacts/${{ env.LIBRARY_NAME }}-${{ matrix.name}}" >> $GITHUB_ENV
+          echo "PRODUCT_NAME=${{ env.LIBRARY_NAME }}-${{ matrix.name }}" >> $GITHUB_ENV
       
-      # # Moving the artefacts to a packaging directory
-      # - name: move artefacts
-      #   shell: bash
-      #   run: |
-      #     mkdir -p ${{ env.PACKAGE_DIR }}
-      #     mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/VST3/${RELEASE_NAME}.vst3" ${{ env.PACKAGE_DIR }};
-      #     if [ "${{ matrix.name }}" == "macOS" ]; then
-      #       mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/AU/${RELEASE_NAME}.component" ${{ env.PACKAGE_DIR }};
-      #       mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.app" ${{ env.PACKAGE_DIR }};
-      #     elif [ "${{ matrix.name }}" == "Windows" ]; then
-      #       mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.exe" ${{ env.PACKAGE_DIR }};
-      #     elif [ "${{ matrix.name }}" == "Linux" ]; then
-      #       mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}" ${{ env.PACKAGE_DIR }};
-      #     else
-      #       echo "Unknown OS";
-      #     fi;
+      # Moving the artefacts to a packaging directory
+      - name: move artefacts
+        shell: bash
+        run: |
+          mkdir -p ${{ env.PACKAGE_DIR }}
+          if [ "${{ matrix.name }}" == "macOS" ]; then
+            mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }};
+          elif [ "${{ matrix.name }}" == "Windows" ]; then
+            mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.ddl" ${{ env.PACKAGE_DIR }};
+          elif [ "${{ matrix.name }}" == "Linux" ]; then
+            mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.so" ${{ env.PACKAGE_DIR }};
+          else
+            echo "Unknown OS";
+          fi;
 
       # # We need to import the apple developer certificate so that we can codesign our binaries
       # - name: import certificates (macOS)
@@ -147,20 +142,20 @@ jobs:
       #     codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component";
       #     codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.app";
       
-      # # Zip the artefact
-      # - name: zip artefacts
-      #   working-directory: ${{github.workspace}}/artefacts
-      #   shell: bash
-      #   run: |
-      #     if [ "${{ matrix.name }}" == "macOS" ]; then
-      #       zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
-      #     elif [ "${{ matrix.name }}" == "Windows" ]; then
-      #       tar -a -c -f ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/
-      #     elif [ "${{ matrix.name }}" == "Linux" ]; then
-      #       zip -r ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/
-      #     else
-      #       echo "Unknown OS";
-      #     fi;
+      # Zip the artefact
+      - name: zip artefacts
+        working-directory: ${{github.workspace}}/artefacts
+        shell: bash
+        run: |
+          if [ "${{ matrix.name }}" == "macOS" ]; then
+            zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
+          elif [ "${{ matrix.name }}" == "Windows" ]; then
+            tar -a -c -f ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/
+          elif [ "${{ matrix.name }}" == "Linux" ]; then
+            zip -r ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/
+          else
+            echo "Unknown OS";
+          fi;
 
       # # Let's now notarize the zip file and with it all its contents / binaries
       # - name: notarize (macOS)
@@ -179,11 +174,11 @@ jobs:
       #     # And finally zip it again
       #     zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
           
-      # - name: upload artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ env.PRODUCT_NAME }}.zip
-      #     path: artefacts/${{ env.PRODUCT_NAME }}.zip
+      - name: upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.PRODUCT_NAME }}.zip
+          path: artefacts/${{ env.PRODUCT_NAME }}.zip
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
