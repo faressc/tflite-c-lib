@@ -126,13 +126,13 @@ jobs:
           mkdir -p ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c
           mkdir -p ${{ env.PACKAGE_DIR }}/lib
 
-          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/c/c_api.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/c/c_api_experimental.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/core/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
-          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/core/async/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
+          mv "tensorflow_src/tensorflow/lite/c/c_api.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "tensorflow_src/tensorflow/lite/c/c_api_experimental.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "tensorflow_src/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "tensorflow_src/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "tensorflow_src/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "tensorflow_src/tensorflow/lite/core/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "tensorflow_src/tensorflow/lite/core/async/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
           
           if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }}/lib;
