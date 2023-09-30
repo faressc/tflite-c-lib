@@ -131,8 +131,18 @@ jobs:
           mv "tensorflow_src/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
           mv "tensorflow_src/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
           mv "tensorflow_src/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "tensorflow_src/tensorflow/lite/core/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
-          mv "tensorflow_src/tensorflow/lite/core/async/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
+          mv "tensorflow_src/tensorflow/lite/core/c/builtin_op_data.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "tensorflow_src/tensorflow/lite/core/c/c_api_experimental.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "tensorflow_src/tensorflow/lite/core/c/c_api_opaque.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "tensorflow_src/tensorflow/lite/core/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "tensorflow_src/tensorflow/lite/core/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "tensorflow_src/tensorflow/lite/core/c/c_api.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "tensorflow_src/tensorflow/lite/core/c/registration_external.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "tensorflow_src/tensorflow/lite/core/async/c/async_kernel.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
+          mv "tensorflow_src/tensorflow/lite/core/async/c/async_signature_runner.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
+          mv "tensorflow_src/tensorflow/lite/core/async/c/internal.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
+          mv "tensorflow_src/tensorflow/lite/core/async/c/task.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
+          mv "tensorflow_src/tensorflow/lite/core/async/c/types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
           
           if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }}/lib;
