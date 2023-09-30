@@ -31,10 +31,12 @@ jobs:
     strategy:
       fail-fast: false # show all errors for each platform (vs. cancel jobs on error)
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
         include:
           - os: macOS-latest
-            name: macOS
+            name: macOS-x86_64
+            ccache: ccache
+          - os: macOS-latest
+            name: macOS-arm64
             ccache: ccache
           - os: windows-latest
             name: Windows
@@ -60,7 +62,7 @@ jobs:
       - name: install deps
         shell: bash
         run: |
-          if [ "${{ matrix.name }}" == "macOS" ]; then
+          if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             brew install osxutils
           elif [ "${{ matrix.name }}" == "Windows" ]; then
             choco install ccache
@@ -81,7 +83,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@main
         with:
-          key: v3-${{ matrix.os }}-${{ env.BUILD_TYPE }}
+          key: v3-${{ matrix.name }}-${{ env.BUILD_TYPE }}
           variant: ${{ matrix.ccache }}
       
       # Typical cmake configuration with default generator
@@ -90,7 +92,13 @@ jobs:
         run: |
           mkdir ${{ env.BUILD_DIR }}
           cd ${{ env.BUILD_DIR }}
-          cmake ../tensorflow_src/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }}
+          if [ "${{ matrix.name }}" == "macOS-x86_64" ]; then
+            cmake ../tensorflow_src/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES=x86_64
+          elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
+            cmake ../tensorflow_src/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES=arm64
+          else
+            cmake ../tensorflow_src/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }}
+          fi;
 
       # Build the project
       - name: cmake build
@@ -118,14 +126,15 @@ jobs:
           mkdir -p ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c
           mkdir -p ${{ env.PACKAGE_DIR }}/lib
 
-          mv "${{ env.BUILD_DIR }}/tensorflow/lite/c/c_api.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow/lite/c/c_api_experimental.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-          mv "${{ env.BUILD_DIR }}/tensorflow/lite/core/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
-          mv "${{ env.BUILD_DIR }}/tensorflow/lite/core/async/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
-          if [ "${{ matrix.name }}" == "macOS" ]; then
+          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/c/c_api.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/c/c_api_experimental.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/core/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "${{ env.BUILD_DIR }}/tensorflow_src/tensorflow/lite/core/async/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
+          
+          if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }}/lib;
           elif [ "${{ matrix.name }}" == "Windows" ]; then
             mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dll" ${{ env.PACKAGE_DIR }}/lib;
@@ -140,7 +149,7 @@ jobs:
         working-directory: ${{github.workspace}}/artefacts
         shell: bash
         run: |
-          if [ "${{ matrix.name }}" == "macOS" ]; then
+          if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
           elif [ "${{ matrix.name }}" == "Windows" ]; then
             tar -a -c -f ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/
