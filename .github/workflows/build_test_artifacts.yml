@@ -195,7 +195,7 @@ jobs:
           xcrun notarytool submit ${{ env.PRODUCT_NAME }}.zip --apple-id ${{ secrets.APPLE_DEV_ID }} --password ${{ secrets.APPLE_DEV_PWD }} --team-id ${{ secrets.TEAM_ID }} --wait
           # Then we need to unzip it and staple the ticket for the gatekeeper to all binaries
           unzip ${{ env.PRODUCT_NAME }}.zip && rm ${{ env.PRODUCT_NAME }}.zip
-          xcrun stapler staple "${{ env.PACKAGE_DIR }}/lib/libtensorflowlite_c.dylib";
+          xcrun stapler staple "lib/libtensorflowlite_c.dylib";
           # And finally zip it again
           zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
           
