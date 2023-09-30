@@ -109,37 +109,31 @@ jobs:
         shell: bash
         run: |
           mkdir -p ${{ env.PACKAGE_DIR }}
+          mkdir -p ${{ env.PACKAGE_DIR }}/include
+          mkdir -p ${{ env.PACKAGE_DIR }}/include/tensorflow
+          mkdir -p ${{ env.PACKAGE_DIR }}/include/tensorflow/lite
+          mkdir -p ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core
+          mkdir -p ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c
+          mkdir -p ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async
+          mkdir -p ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c
+          mkdir -p ${{ env.PACKAGE_DIR }}/lib
+
+          mv "${{ env.BUILD_DIR }}/tensorflow/lite/c/c_api.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow/lite/c/c_api_experimental.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+          mv "${{ env.BUILD_DIR }}/tensorflow/lite/core/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+          mv "${{ env.BUILD_DIR }}/tensorflow/lite/core/async/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
           if [ "${{ matrix.name }}" == "macOS" ]; then
-            mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }};
+            mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }}/lib;
           elif [ "${{ matrix.name }}" == "Windows" ]; then
-            mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.ddl" ${{ env.PACKAGE_DIR }};
+            mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dll" ${{ env.PACKAGE_DIR }}/lib;
           elif [ "${{ matrix.name }}" == "Linux" ]; then
-            mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.so" ${{ env.PACKAGE_DIR }};
+            mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.so" ${{ env.PACKAGE_DIR }}/lib;
           else
             echo "Unknown OS";
           fi;
-
-      # # We need to import the apple developer certificate so that we can codesign our binaries
-      # - name: import certificates (macOS)
-      #   uses: apple-actions/import-codesign-certs@v1
-      #   if: ${{ matrix.name == 'macOS' }}
-      #   with:
-      #     # GitHub encrypted secrets
-      #     p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
-      #     p12-password: ${{ secrets.DEV_ID_APP_PWD }}
-
-      # # Codesigning all the binaries
-      # - name: codesign (macOS)
-      #   if: ${{ matrix.name == 'macOS' }}
-      #   run: |
-      #     codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3" --deep --strict --options=runtime --timestamp;
-      #     codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component" --deep --strict --options=runtime --timestamp;
-      #     # The standalone needs to have specific entitlements, which we need to add when we codesign the files. Since we have set the entitlements in the CMakeLists.txt we can use the generated file in the location below
-      #     codesign --entitlements "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/JuceLibraryCode/${TARGET_NAME}_Standalone.entitlements" --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.app" --deep --strict --options=runtime --timestamp;
-      #     # Here we check the code signitures
-      #     codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3";
-      #     codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component";
-      #     codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.app";
       
       # Zip the artefact
       - name: zip artefacts
@@ -155,23 +149,6 @@ jobs:
           else
             echo "Unknown OS";
           fi;
-
-      # # Let's now notarize the zip file and with it all its contents / binaries
-      # - name: notarize (macOS)
-      #   working-directory: ${{github.workspace}}/artefacts
-      #   if: ${{ matrix.name == 'macOS' }}
-      #   run: |
-      #     # In contrast to dmg files zip files do not need to be codesigned before notarization
-      #     xcrun notarytool submit ${{ env.PRODUCT_NAME }}.zip --apple-id ${{ secrets.APPLE_DEV_ID }} --password ${{ secrets.APPLE_DEV_PWD }} --team-id ${{ secrets.TEAM_ID }} --wait
-      #     # Then we need to unzip it and staple the ticket for the gatekeeper to all binaries
-      #     unzip ${{ env.PRODUCT_NAME }}.zip && rm ${{ env.PRODUCT_NAME }}.zip
-      #     cd ${{ env.PRODUCT_NAME }}
-      #     xcrun stapler staple "${RELEASE_NAME}.vst3";
-      #     xcrun stapler staple "${RELEASE_NAME}.component";
-      #     xcrun stapler staple "${RELEASE_NAME}.app";
-      #     cd ..
-      #     # And finally zip it again
-      #     zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
           
       - name: upload artifact
         uses: actions/upload-artifact@v3
