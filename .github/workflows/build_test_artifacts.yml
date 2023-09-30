@@ -153,7 +153,24 @@ jobs:
           else
             echo "Unknown OS";
           fi;
-      
+
+      # We need to import the apple developer certificate so that we can codesign our binaries
+      - name: import certificates (macOS)
+        uses: apple-actions/import-codesign-certs@v2
+        if: ${{ matrix.name == 'macOS' }}
+        with:
+          # GitHub encrypted secrets
+          p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
+          p12-password: ${{ secrets.DEV_ID_APP_PWD }}
+
+      # Codesigning all the binaries
+      - name: codesign (macOS)
+        if: ${{ matrix.name == 'macOS' }}
+        run: |
+          codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/lib/libtensorflowlite_c.dylib" --deep --strict --options=runtime --timestamp;
+          # Here we check the code signitures
+          codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/lib/libtensorflowlite_c.dylib";
+
       # Zip the artefact
       - name: zip artefacts
         working-directory: ${{github.workspace}}/artefacts
@@ -168,6 +185,19 @@ jobs:
           else
             echo "Unknown OS";
           fi;
+
+      # Let's now notarize the zip file and with it all its contents / binaries
+      - name: notarize (macOS)
+        working-directory: ${{github.workspace}}/artefacts
+        if: ${{ matrix.name == 'macOS' }}
+        run: |
+          # In contrast to dmg files zip files do not need to be codesigned before notarization
+          xcrun notarytool submit ${{ env.PRODUCT_NAME }}.zip --apple-id ${{ secrets.APPLE_DEV_ID }} --password ${{ secrets.APPLE_DEV_PWD }} --team-id ${{ secrets.TEAM_ID }} --wait
+          # Then we need to unzip it and staple the ticket for the gatekeeper to all binaries
+          unzip ${{ env.PRODUCT_NAME }}.zip && rm ${{ env.PRODUCT_NAME }}.zip
+          xcrun stapler staple "${{ env.PACKAGE_DIR }}/lib/libtensorflowlite_c.dylib";
+          # And finally zip it again
+          zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
           
       - name: upload artifact
         uses: actions/upload-artifact@v3
