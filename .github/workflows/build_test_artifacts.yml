@@ -81,9 +81,9 @@ jobs:
       
       # Using the ccache action to store the build cache and speed up the next builds
       - name: ccache
-        uses: hendrikmuhs/ccache-action@main
+        uses: hendrikmuhs/ccache-action@1.2
         with:
-          key: v3-${{ matrix.name }}-${{ env.BUILD_TYPE }}
+          key: v3-${{ matrix.os }}-${{ matrix.type }}
           variant: ${{ matrix.ccache }}
       
       # Typical cmake configuration with default generator
@@ -147,6 +147,7 @@ jobs:
           if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }}/lib;
           elif [ "${{ matrix.name }}" == "Windows" ]; then
+            ls -l "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}";
             mv "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.dll" ${{ env.PACKAGE_DIR }}/lib;
           elif [ "${{ matrix.name }}" == "Linux" ]; then
             mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.so" ${{ env.PACKAGE_DIR }}/lib;
@@ -216,5 +217,6 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
+        prerelease: true
         files: |
           */*.zip
