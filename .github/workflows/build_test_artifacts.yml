@@ -96,6 +96,8 @@ jobs:
             cmake ../tensorflow_src/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES=x86_64
           elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
             cmake ../tensorflow_src/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES=arm64
+          elif [ "${{ matrix.name }}" == "Windows" ]; then
+            cmake ../tensorflow_src/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=True
           else
             cmake ../tensorflow_src/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }}
           fi;
