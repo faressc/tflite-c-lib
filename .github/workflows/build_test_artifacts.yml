@@ -147,9 +147,10 @@ jobs:
           if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }}/lib;
           elif [ "${{ matrix.name }}" == "Windows" ]; then
-            ls -l "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}";
-            mv "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.lib" ${{ env.PACKAGE_DIR }}/lib;
-            mv "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.dll" ${{ env.PACKAGE_DIR }}/lib;
+            ls -R "${{ env.BUILD_DIR }}/";
+            # mv "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.lib" ${{ env.PACKAGE_DIR }}/lib;
+            # mv "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.dll" ${{ env.PACKAGE_DIR }}/lib;
+            mv "${{ env.BUILD_DIR }}/" ${{ env.PACKAGE_DIR }}/lib;
           elif [ "${{ matrix.name }}" == "Linux" ]; then
             mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.so" ${{ env.PACKAGE_DIR }}/lib;
           else
