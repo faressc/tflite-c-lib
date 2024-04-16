@@ -189,18 +189,6 @@ jobs:
           else
             echo "Unknown OS";
           fi;
-
-      # Let's now notarize the zip file and with it all its contents / binaries
-      - name: notarize (macOS)
-        working-directory: ${{github.workspace}}/artefacts
-        if: ${{ matrix.os == 'macOS-latest' }}
-        run: |
-          # In contrast to dmg files zip files do not need to be codesigned before notarization
-          xcrun notarytool submit ${{ env.PRODUCT_NAME }}.zip --apple-id ${{ secrets.APPLE_DEV_ID }} --password ${{ secrets.APPLE_DEV_PWD }} --team-id ${{ secrets.TEAM_ID }} --wait
-          # Then we need to unzip it and staple the ticket for the gatekeeper to all binaries
-          unzip ${{ env.PRODUCT_NAME }}.zip && rm ${{ env.PRODUCT_NAME }}.zip
-          # And finally zip it again
-          zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
           
       - name: upload artifact
         uses: actions/upload-artifact@v4
