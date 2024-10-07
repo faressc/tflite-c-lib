@@ -62,6 +62,8 @@ jobs:
                     elif [ "${{ matrix.name }}" == "macOS-x86_64" ]; then
                             brew install osxutils ninja
                             echo "brew prefix: $(brew --prefix)"
+                            git clone https://github.com/intel/ARM_NEON_2_x86_SSE.git
+                            sudo cp ARM_NEON_2_x86_SSE/NEON_2_SSE.h /usr/local/include/
                     elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
                             brew install osxutils ninja
                             echo "brew prefix: $(brew --prefix)"
@@ -126,8 +128,8 @@ jobs:
                     mv "tensorflow/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
                     mv "tensorflow/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
                     # When using wildcards with bash, we cannot use quotes
-                    mv tensorflow/tensorflow/lite/core/c/*.h ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
-                    mv tensorflow/tensorflow/lite/core/async/c/*.h ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
+                    cp tensorflow/tensorflow/lite/core/c/*.h ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+                    cp tensorflow/tensorflow/lite/core/async/c/*.h ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
                     
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
                         mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.so" ${{ env.PACKAGE_DIR }}/lib;
