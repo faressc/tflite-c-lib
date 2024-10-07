@@ -125,7 +125,7 @@ jobs:
                     mv "tensorflow/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
                     mv "tensorflow/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
                     mv "tensorflow/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-                    mv "tensorflow/tensorflow/lite/core/c/*.h  ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+                    mv "tensorflow/tensorflow/lite/core/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
                     mv "tensorflow/tensorflow/lite/core/async/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
                     
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
