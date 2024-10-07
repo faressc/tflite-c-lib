@@ -63,7 +63,7 @@ jobs:
                             brew install osxutils ninja
                             echo "brew prefix: $(brew --prefix)"
                             git clone https://github.com/intel/ARM_NEON_2_x86_SSE.git
-                            sudo cp ARM_NEON_2_x86_SSE/NEON_2_SSE.h /usr/local/include/
+
                     elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
                             brew install osxutils ninja
                             echo "brew prefix: $(brew --prefix)"
@@ -90,11 +90,11 @@ jobs:
                     mkdir ${{ env.BUILD_DIR }}
                     cd ${{ env.BUILD_DIR }}
                     if [ "${{ matrix.name }}" == "macOS-x86_64" ]; then
-                        cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES=x86_64
+                        cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES=../ARM_NEON_2_x86_SSE
                     elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
                         cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES=arm64
                     elif [ "${{ matrix.name }}" == "Windows" ]; then
-                        cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=True -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_STANDARD_REQUIRED=True
+                        cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=True -DCMAKE_CXX_STANDARD=20
                     else
                         cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
                     fi;
