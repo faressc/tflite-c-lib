@@ -92,7 +92,7 @@ jobs:
                     elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
                         cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES=arm64
                     elif [ "${{ matrix.name }}" == "Windows" ]; then
-                        cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=True
+                        cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=True -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_STANDARD_REQUIRED=True
                     else
                         cmake ../tensorflow/tensorflow/lite/c -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
                     fi;
@@ -125,8 +125,9 @@ jobs:
                     mv "tensorflow/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
                     mv "tensorflow/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
                     mv "tensorflow/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-                    mv "tensorflow/tensorflow/lite/core/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
-                    mv "tensorflow/tensorflow/lite/core/async/c/*.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
+                    # When using wildcards with bash, we cannot use quotes
+                    mv tensorflow/tensorflow/lite/core/c/*.h ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
+                    mv tensorflow/tensorflow/lite/core/async/c/*.h ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
                     
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
                         mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.so" ${{ env.PACKAGE_DIR }}/lib;
