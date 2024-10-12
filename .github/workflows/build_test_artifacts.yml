@@ -51,7 +51,6 @@ jobs:
                     echo ${{ github.ref }}
                     echo "matrix.name=${{ matrix.name }}";
                     echo "matrix.os=${{ matrix.os }}";
-                    echo "matrix.ccache=${{ matrix.ccache }}";
 
             # We need the osxutils to get the codesign and notorization tools
             -   name: install deps
@@ -71,6 +70,15 @@ jobs:
                             echo "Unknown OS";
                     fi;
 
+            -   name: debug printouts
+                if: ${{ matrix.name == 'macOS-x86_64' }}
+                shell: bash
+                run: |
+                    echo "Debug printouts for macOS-x86_64"
+                    xcode-select -p
+                    xcodebuild -version
+                    cmake --version
+            
             # With this we checkout to our repo
             -   name: get repo and submodules
                 uses: actions/checkout@v4
