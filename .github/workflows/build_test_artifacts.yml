@@ -22,7 +22,7 @@ env:
     # Use up to 4 cpus to build juceaide, etc
     CMAKE_BUILD_PARALLEL_LEVEL: 4 
     # Name of the build directory
-    BUILD_DIR: tflite-build
+    BUILD_DIR: tflite_build
 
 jobs:
 
@@ -128,23 +128,23 @@ jobs:
                     mkdir -p ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c
                     mkdir -p ${{ env.PACKAGE_DIR }}/lib
 
-                    mv "tensorflow/tensorflow/lite/c/c_api.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-                    mv "tensorflow/tensorflow/lite/c/c_api_experimental.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-                    mv "tensorflow/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-                    mv "tensorflow/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
-                    mv "tensorflow/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+                    cp "tensorflow/tensorflow/lite/c/c_api.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+                    cp "tensorflow/tensorflow/lite/c/c_api_experimental.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+                    cp "tensorflow/tensorflow/lite/c/c_api_types.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+                    cp "tensorflow/tensorflow/lite/c/common.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
+                    cp "tensorflow/tensorflow/lite/builtin_ops.h" ${{ env.PACKAGE_DIR }}/include/tensorflow/lite;
                     # When using wildcards with bash, we cannot use quotes
                     cp tensorflow/tensorflow/lite/core/c/*.h ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/c;
                     cp tensorflow/tensorflow/lite/core/async/c/*.h ${{ env.PACKAGE_DIR }}/include/tensorflow/lite/core/async/c;
                     
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
-                        mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.so" ${{ env.PACKAGE_DIR }}/lib;
+                        cp "${{ env.BUILD_DIR }}/libtensorflowlite_c.so" ${{ env.PACKAGE_DIR }}/lib;
                     elif [ "${{ matrix.os }}" == "macOS-latest" ]; then
-                        mv "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }}/lib;
+                        cp "${{ env.BUILD_DIR }}/libtensorflowlite_c.dylib" ${{ env.PACKAGE_DIR }}/lib;
                     elif [ "${{ matrix.name }}" == "Windows" ]; then
-                        mv "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.dll" ${{ env.PACKAGE_DIR }}/lib;
-                        mv "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.exp" ${{ env.PACKAGE_DIR }}/lib;
-                        mv "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.lib" ${{ env.PACKAGE_DIR }}/lib;
+                        cp "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.dll" ${{ env.PACKAGE_DIR }}/lib;
+                        cp "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.exp" ${{ env.PACKAGE_DIR }}/lib;
+                        cp "${{ env.BUILD_DIR }}/${{ env.BUILD_TYPE }}/tensorflowlite_c.lib" ${{ env.PACKAGE_DIR }}/lib;
                     else
                         echo "Unknown OS";
                     fi;
